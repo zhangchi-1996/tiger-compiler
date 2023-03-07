@@ -14,7 +14,7 @@ lex.yy.o: lex.yy.c $(INC)tokens.h $(INC)errormsg.h $(UTIL_INC)util.h
 		cc -g -c lex.yy.c
 
 lex.yy.c: tiger.lex
-		lex tiger.lex
+		flex tiger.lex
 
 util.o: $(UTIL_LIB_INC)util.c $(UTIL_INC)util.h
 		cc -g -c $(UTIL_LIB_INC)util.c
