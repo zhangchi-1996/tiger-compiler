@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "util.h"
+#include "../include/util.h"
 
 void *checked_malloc(int len)
 {
