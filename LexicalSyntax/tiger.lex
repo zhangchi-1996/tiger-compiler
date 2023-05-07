@@ -1,16 +1,18 @@
 %{
 #include <string.h>
-#include "../include/util.h"
-#include "../include/LexicalSyntax/tokens.h"
-#include "../include/LexicalSyntax/errormsg.h"
+#include "include/util.h"
+#include "include/LexicalSyntax/tokens.h"
+#include "include/LexicalSyntax/errormsg.h"
 
 int charPos = 1;
 int commentDepth = 0;
 
 #define BUFSIZE 8192
+// std::vector <std::string> strbuf;
 char strbuf[BUFSIZE+1];
 char *strptr = NULL;
 unsigned int strlength = 0;
+
 void setup(void)
 {
     *strbuf = '\0';
@@ -19,15 +21,9 @@ void setup(void)
 
 char *teardown()
 {
-    char *s = checked_malloc(strlen(strbuf) + 1);
+    char *s = static_cast<char *>(checked_malloc(strlen(strbuf) + 1));
     strcpy(s, strbuf);
     return s;
-}
-
-int yywrap(void)
-{
-    charPos = 1;
-    return 1;
 }
 
 void appendstr(char *str){
@@ -39,9 +35,17 @@ void appendstr(char *str){
 
 void adjust(void)
 {
-    EM_tokPos = charPos = charPos;
+    ErrorMsg::getInstance()->set_pos(charPos);
+    // EM_tokPos = charPos = charPos;
     charPos += yyleng;
 }
+extern "C"
+int yywrap(void)
+{
+    charPos = 1;
+    return 1;
+}
+
 %}
 
 %x COMMENT STR
@@ -53,7 +57,7 @@ void adjust(void)
     "/*" {adjust(); commentDepth++;}
     "*/" {adjust(); if(--commentDepth == 0) BEGIN(INITIAL);}
     [^\n] {adjust();}
-    (\n|\r\n)   {adjust(); EM_newline();}
+    (\n|\r\n)   {adjust(); ErrorMsg::getInstance()->newline();}
 }
 "while"                     {adjust(); return WHILE;}
 "for"                       {adjust(); return FOR;}
@@ -94,7 +98,7 @@ void adjust(void)
 ":="                        {adjust(); return ASSIGN;}
 "&"                         {adjust(); return AND;}
 "|"                         {adjust(); return OR;}
-\n                          {adjust(); EM_newline(); continue;}
+\n                          {adjust(); ErrorMsg::getInstance()->newline(); continue;}
 [0-9]+                      {adjust(); yylval.ival=atoi(yytext); return INT;}
 \" {adjust(); BEGIN(STR); setup();}
 <STR>{
@@ -106,9 +110,9 @@ void adjust(void)
     \\\\            {adjust(); appendstr(yytext);}
     \\\"            {adjust(); appendstr(yytext);}
     \\[ \n\t\r\f]+\\    {adjust(); appendstr(yytext);}
-    \\(.|\n)            {adjust(); EM_error(EM_tokPos, "illegal token");}
-    \n                  {adjust(); EM_error(EM_tokPos, "illegal token");}
+    \\(.|\n)            {adjust(); ErrorMsg::getInstance()->Error(1, "illegal token");}
+    \n                  {adjust(); ErrorMsg::getInstance()->Error(1, "illegal token");}
     [^\"\\\n]+          {adjust(); appendstr(yytext);}
 }
-.                           {adjust(); EM_error(EM_tokPos, "illegal token");}
+.                           {adjust(); ErrorMsg::getInstance()->Error(1, "illegal token");}
 %%
