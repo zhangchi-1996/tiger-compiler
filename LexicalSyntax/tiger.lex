@@ -36,7 +36,6 @@ void appendstr(char *str){
 void adjust(void)
 {
     ErrorMsg::getInstance()->set_pos(charPos);
-    // EM_tokPos = charPos = charPos;
     charPos += yyleng;
 }
 extern "C"

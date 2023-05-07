@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-project(LexicalSyntax)
+project(Tiger)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
@@ -12,4 +12,4 @@ FLEX_TARGET(LEXER
     ${PROJECT_SOURCE_DIR}/LexicalSyntax/tiger.lex 
     ${PROJECT_SOURCE_DIR}/lex.cc)
 
-add_executable(LexicalSyntax driver.cc ${FLEX_LEXER_OUTPUTS})
+ add_executable(Tiger driver.cc ${FLEX_LEXER_OUTPUTS} support/util.cc LexicalSyntax/errormsg.cc support/util.cc)

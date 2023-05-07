@@ -4,12 +4,11 @@
 #include <string>
 #include <iostream>
 
-#include "util.h"
 #include <LexicalSyntax/errormsg.h>
 #include <LexicalSyntax/tokens.h>
 
 YYSTYPE yylval;
-int yylex(void);
+int yylex();
 extern FILE *yyin;
 
 std::string toknames[] = {

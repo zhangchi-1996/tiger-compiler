@@ -1,29 +1,20 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
+#include <cstdio>
+#include <cstdarg>
 
 #include <string>
+#include <utility>
 #include <LexicalSyntax/errormsg.h>
 
-ErrorMsg * ErrorMsg::instance = NULL;
-
+ErrorMsg * ErrorMsg::instance = nullptr;
+ErrorMsg::Deleter ErrorMsg::deleter;
 ErrorMsg::ErrorMsg()
 {
     fileName = "";
     lineNum = 1;
     tokPos = 0;
-    //file = new std::ifstream(filename.c_str());
-   //  if (!file){
-   //      EM_error(0, "cannot open");
-   //      exit(1);
-   //  }
 }
 
-ErrorMsg::~ErrorMsg()
-{
-}
-
-void ErrorMsg::Error(int pos, std::string message, ...)
+void ErrorMsg::Error(int pos, const std::string& message, ...)
 {
     va_list ap;
     IntList lines = linePos;
@@ -34,7 +25,7 @@ void ErrorMsg::Error(int pos, std::string message, ...)
         lines = lines->rest;
         num--;
     }
-    fprintf(stderr, "%s: ", fileName);
+    fprintf(stderr, "%s: ", fileName.c_str());
     if (lines) fprintf(stderr, "%d.%d: ", num, pos-lines->i);
     va_start(ap, message);
     vfprintf(stderr, message.c_str(), ap);
@@ -44,17 +35,12 @@ void ErrorMsg::Error(int pos, std::string message, ...)
 
 void ErrorMsg::Reset(std::string filename){
     anyErrors = FALSE;
-    this->fileName = filename;
+    this->fileName = std::move(filename);
     this->lineNum  = 1;
-    linePos   = intList(0, NULL);
-//    yyin = fopen(filename.c_str(), "r");
-//    if (!yyin){
-//        EM_error(0, "cannot open");
-//        exit(1);
-//    }
+    linePos   = intList(0, nullptr);
 }
 
-void ErrorMsg::newline(void)
+void ErrorMsg::newline()
 {
     lineNum ++;
     linePos = intList(tokPos, linePos);

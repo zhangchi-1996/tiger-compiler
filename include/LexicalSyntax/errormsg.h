@@ -1,5 +1,6 @@
 #include <string>
 #include "util.h"
+#include <iostream>
 
 typedef struct intList
 {
@@ -21,42 +22,38 @@ private:
     std::string fileName;
     int lineNum;
     int tokPos;
-    IntList linePos = NULL;
+    IntList linePos = nullptr;
     bool anyErrors = FALSE;
 private:
     static ErrorMsg *instance;
 private:
     ErrorMsg();
-    ~ErrorMsg();
+    ~ErrorMsg() = default;
     ErrorMsg(const ErrorMsg &);
     ErrorMsg &operator=(const ErrorMsg &);
 private:
-    class Deletor
+    class Deleter
     {
     public:
-        Deletor();
-        ~Deletor(){
-            if(ErrorMsg::instance != NULL)
-                delete ErrorMsg::instance;
+        Deleter() = default;
+        ~Deleter(){
+            delete ErrorMsg::instance;
         }
     };
-    static Deletor deletor;
+    static Deleter deleter;
 public:
     static ErrorMsg *getInstance(){
-        if(instance == NULL){
+        if(instance == nullptr){
             instance = new ErrorMsg();
         }
         return instance;
     }
 
-    void Error(int, std::string, ...);
+    void Error(int, const std::string&, ...);
     void Reset(std::string filename);
-    void newline(void);
+    void newline();
 
     void set_pos(int pos){tokPos = pos;};
-    int get_pos(){return tokPos;};
-    bool isError(){return anyErrors;};
+    [[nodiscard]] int get_pos() const{return tokPos;};
+    [[nodiscard]] bool isError() const{return anyErrors;};
 };
-
-
-    // COMPILE_FLAGS "-Cm -B -L --c++ --nounistd")
